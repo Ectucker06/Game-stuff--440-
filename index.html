@@ -110,7 +110,7 @@ function update() {
 
   blocks = blocks.filter(block => block.y < canvas.height);
 
-  score++;
+  score += 0.2;
 }
 
 function draw() {
@@ -127,19 +127,24 @@ function draw() {
 
   ctx.fillStyle = "white";
   ctx.font = "24px Arial";
-  ctx.fillText("Score: " + score, 20, 35);
+  ctx.fillText("Score: " + Math.floor(score), 20, 35);
 
   if (gameOver) {
-    ctx.fillStyle = "rgba(0,0,0,0.7)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "rgba(0,0,0,0.7)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "white";
-    ctx.font = "40px Arial";
-    ctx.fillText("Game Over", 140, 270);
+  ctx.fillStyle = "white";
 
-    ctx.font = "24px Arial";
-    ctx.fillText("Press R to Restart", 130, 330);
-  }
+  ctx.textAlign = "center";
+
+  ctx.font = "40px Arial";
+  ctx.fillText("Game Over Man", canvas.width / 2, 270);
+
+  ctx.font = "24px Arial";
+  ctx.fillText("Press R to Restart", canvas.width / 2, 330);
+
+  ctx.textAlign = "left";
+}
 }
 
 function restartGame() {
