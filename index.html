@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dodge Da Block</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      margin: auto;
+      background: #222;
+    }
+  </style>
+</head>
+
+<body>
+<canvas id="gameCanvas" width="500" height="600"></canvas>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let blocks = [];
+
+function spawnBlock() {
+  blocks.push({
+    x: Math.random() * 450,
+    y: -30,
+    width: 30,
+    height: 30,
+    speed: 4
+  });
+}
+
+function update() {
+  if (Math.random() < 0.03) {
+    spawnBlock();
+  }
+
+  for (let block of blocks) {
+    block.y += block.speed;
+  }
+
+  blocks = blocks.filter(block => block.y < canvas.height);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let block of blocks) {
+    ctx.fillStyle = "gray";
+    ctx.fillRect(block.x, block.y, block.width, block.height);
+  }
+}
+
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+</body>
+</html>
