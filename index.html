@@ -32,11 +32,17 @@
 <canvas id="gameCanvas" width="700" height="400"></canvas>
 
 <script>
+// game screen.
+// ctx is the drawing tool used to render shapes, text, and the HUD.
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+
+// Game state
+// keys stores which keyboard buttons are currently being pressed.
 let keys = {};
 
+// Player state: position, size, and movement speed.
 let player = {
   x: 40,
   y: 310,
@@ -45,6 +51,7 @@ let player = {
   speed: 4
 };
 
+// danger area. If player overlaps this rectangle, visibility increases.
 let visionZone = {
   x: 280,
   y: 0,
@@ -52,6 +59,7 @@ let visionZone = {
   height: canvas.height
 };
 
+// Goal state
 let goal = {
   x: 640,
   y: 285,
@@ -59,9 +67,13 @@ let goal = {
   height: 75
 };
 
+// gameState controls whether the game is playing, won, or lost.
 let visibility = 0;
 let gameState = "playing";
 
+
+// When a key is pressed, mark it as true.
+// Pressing R restarts the game.
 document.addEventListener("keydown", (e) => {
   keys[e.key] = true;
 
@@ -70,10 +82,14 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// When a key is released, mark it as false.
 document.addEventListener("keyup", (e) => {
   keys[e.key] = false;
 });
 
+
+// checks if player overlaps the vision zone
+// compares the player's left/right edges to the vision zone's left/right edges.
 function isPlayerSeen() {
   return (
     player.x < visionZone.x + visionZone.width &&
@@ -81,9 +97,13 @@ function isPlayerSeen() {
   );
 }
 
+
+// changes the game state every frame:
+// movement, visibility, win condition, and lose condition.
 function update() {
   if (gameState !== "playing") return;
 
+  // Left arrow subtracts from player x Right arrow adds to player x
   if (keys["ArrowLeft"] && player.x > 0) {
     player.x -= player.speed;
   }
@@ -92,65 +112,83 @@ function update() {
     player.x += player.speed;
   }
 
+  // If the player is in the light, visibility rises If the player leaves the light, visibility falls.
   if (isPlayerSeen()) {
     visibility += 0.7;
   } else {
     visibility -= 0.35;
   }
 
+  // min max of visibility 
   visibility = Math.max(0, Math.min(100, visibility));
 
+  // Win condition: If the player reaches the green goal, they escape.
+  // Lose condition: If visibility reaches 100, the player is seen.
   if (player.x + player.width >= goal.x) {
     gameState = "win";
-  }
-
-  if (visibility >= 100) {
+  } else if (visibility >= 100) {
     gameState = "gameOver";
   }
 }
 
+
+// drawBackground() draws the sky, ground, vision zone, and watcher eye.
 function drawBackground() {
+  // Dark background
   ctx.fillStyle = "#0f172a";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  // Ground
   ctx.fillStyle = "#374151";
   ctx.fillRect(0, 360, canvas.width, 40);
 
+  // line of sight
   ctx.fillStyle = "rgba(255, 221, 87, 0.25)";
   ctx.fillRect(visionZone.x, visionZone.y, visionZone.width, visionZone.height);
 
+  // Watcher eye
   ctx.fillStyle = "#facc15";
   ctx.beginPath();
   ctx.arc(390, 70, 35, 0, Math.PI * 2);
   ctx.fill();
 
+  // Watcher eye pupil
   ctx.fillStyle = "black";
   ctx.beginPath();
   ctx.arc(390, 70, 14, 0, Math.PI * 2);
   ctx.fill();
 }
 
+
+// draw() redraws the screen every frame using the current game state.
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   drawBackground();
 
+  // Draw goal
   ctx.fillStyle = "#22c55e";
   ctx.fillRect(goal.x, goal.y, goal.width, goal.height);
 
+  // Draw player
   ctx.fillStyle = "white";
   ctx.fillRect(player.x, player.y, player.width, player.height);
 
+  // Draw visibility label
   ctx.fillStyle = "white";
   ctx.font = "20px Arial";
   ctx.fillText("Visibility", 20, 30);
 
+  // Draw visibility bar outline
   ctx.strokeStyle = "white";
   ctx.strokeRect(120, 12, 160, 22);
 
+  // Draw visibility bar fill
+  // The bar turns red when visibility is above 70.
   ctx.fillStyle = visibility > 70 ? "red" : "#facc15";
   ctx.fillRect(120, 12, visibility * 1.6, 22);
 
+  // Draw end screens based on gameState.
   if (gameState === "gameOver") {
     drawMessage("SEEN", "Press R to Restart");
   }
@@ -160,6 +198,7 @@ function draw() {
   }
 }
 
+// Reusable message overlay for game over and victory.
 function drawMessage(title, subtitle) {
   ctx.fillStyle = "rgba(0,0,0,0.75)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -176,12 +215,16 @@ function drawMessage(title, subtitle) {
   ctx.textAlign = "left";
 }
 
+
+// Reset the important game state back to the starting values.
 function restartGame() {
   player.x = 40;
   visibility = 0;
   gameState = "playing";
 }
 
+
+// update the logic, draw the screen, then repeat.
 function gameLoop() {
   update();
   draw();
